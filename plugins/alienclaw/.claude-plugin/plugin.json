@@ -1,0 +1,11 @@
+{
+  "name": "alienclaw",
+  "description": "Set up AlienClaw identity linking on any AI agent. Installs the identity SDK from GitHub, wires up initIdentity(), and displays a 6-digit claim code for linking to an Alien account.",
+  "version": "0.1.0",
+  "author": {
+    "name": "AlienClaw"
+  },
+  "homepage": "https://github.com/nembal/alien_linker",
+  "repository": "https://github.com/nembal/alien_linker",
+  "license": "MIT"
+}

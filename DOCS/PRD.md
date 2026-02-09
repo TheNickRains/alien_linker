@@ -85,7 +85,7 @@ See [DOCS/arch.md](./arch.md) for the full technical architecture.
 
 **Trigger:** Clawbot starts on user's infrastructure.
 
-1. On first boot, clawbot generates an **ed25519 keypair** via `@alienclaw/identity`
+1. On first boot, clawbot generates an **ed25519 keypair** via `@alienclaw/identity` (installed from GitHub)
 2. Stores private key at `~/.alienclaw/identity.key` (mode 0600)
 3. Stores public key at `~/.alienclaw/identity.pub`
 4. Calls `POST /api/clawbots/register` with:
@@ -267,7 +267,27 @@ In development mode, mock JWT tokens ending in `.dev` are accepted for local tes
 
 ## 9. Clawbot Identity SDK (`@alienclaw/identity`)
 
-A minimal package for clawbot operators. Lives in `packages/identity/`.
+A minimal package for clawbot operators. Lives in `packages/identity/`. Installed from GitHub (not published to npm).
+
+### Installation
+
+**Claude Code plugin (recommended):**
+```
+/plugin marketplace add nembal/alien_linker
+/plugin install alienclaw@nembal-alien-linker
+```
+Then on any agent project:
+```
+/alienclaw:setup https://your-linker.vercel.app
+```
+
+**Manual from GitHub:**
+```bash
+git clone --depth 1 https://github.com/nembal/alien_linker.git /tmp/alienclaw-tmp
+cp -r /tmp/alienclaw-tmp/packages/identity ./alienclaw-identity
+rm -rf /tmp/alienclaw-tmp
+bun add ./alienclaw-identity
+```
 
 ### Usage
 
@@ -277,7 +297,7 @@ import { initIdentity } from "@alienclaw/identity";
 const identity = await initIdentity({
   name: "my-research-bot",
   endpoint: "https://my-vps:3001",
-  linkerUrl: "https://alienclaw-linker.vercel.app",
+  linkerUrl: "https://your-linker.vercel.app",
   port: 3001,
 });
 
@@ -301,8 +321,8 @@ const identity = await initIdentity({
 ### CLI
 
 ```bash
-# Run directly
-BOT_NAME=my-bot LINKER_URL=http://localhost:3000 npx tsx packages/identity/src/index.ts
+# Run directly (after installing from GitHub)
+BOT_NAME=my-bot LINKER_URL=http://localhost:3000 bun run alienclaw-identity/src/index.ts
 ```
 
 ---

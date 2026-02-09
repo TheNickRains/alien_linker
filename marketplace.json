@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "name": "alienclaw",
+      "description": "Set up AlienClaw identity linking on any AI agent. Links your agent to your Alien account with cryptographic proof of ownership.",
+      "version": "0.1.0",
+      "source": "./plugins/alienclaw"
+    }
+  ]
+}

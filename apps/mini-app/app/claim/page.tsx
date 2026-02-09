@@ -15,16 +15,17 @@ import Link from "next/link";
 const AGENT_PROMPT = (linkerUrl: string) =>
   `Set up AlienClaw identity linking on this machine so I can link you to my Alien account.
 
-1. Install the SDK: bun add @alienclaw/identity
-2. Add this to your startup/entry point:
+1. Install the SDK:
+   git clone --depth 1 https://github.com/nembal/alien_linker.git /tmp/alienclaw-tmp
+   cp -r /tmp/alienclaw-tmp/packages/identity ./alienclaw-identity
+   rm -rf /tmp/alienclaw-tmp
+   npm install ./alienclaw-identity
 
-import { initIdentity } from "@alienclaw/identity"
-await initIdentity({
-  name: "my-agent",
-  linkerUrl: "${linkerUrl}",
-})
+2. Add to your startup:
+   import { initIdentity } from "@alienclaw/identity"
+   await initIdentity({ name: "my-agent", linkerUrl: "${linkerUrl}" })
 
-3. Run it and show me the 6-digit claim code from the output.`;
+3. Run it and show me the 6-digit claim code.`;
 
 function ClaimContent() {
   const router = useRouter();
@@ -121,26 +122,30 @@ function ClaimContent() {
         {showSetup && (
           <TerminalCard glow="cyan">
             <div className="space-y-5 text-xs">
-              {/* Option 1: Prompt */}
+              {/* Option 1: Claude Skill */}
               <div className="space-y-1.5">
                 <p className="text-terminal-dim uppercase tracking-wider">
-                  Option 1 — Give your agent this prompt
+                  Option 1 — Claude Code plugin
                 </p>
                 <p className="text-terminal-text">
-                  Copy and paste this into your agent&apos;s chat:
+                  Install once, then run on any agent:
                 </p>
-                <CopyBlock text={AGENT_PROMPT(linkerUrl)} />
+                <CopyBlock text={`/plugin marketplace add nembal/alien_linker\n/plugin install alienclaw@nembal-alien-linker`} />
+                <p className="text-terminal-text mt-1.5">
+                  Then run:
+                </p>
+                <CopyBlock text={`/alienclaw:setup ${linkerUrl}`} />
               </div>
 
-              {/* Option 2: Claude Skill */}
+              {/* Option 2: Prompt */}
               <div className="space-y-1.5">
                 <p className="text-terminal-dim uppercase tracking-wider">
-                  Option 2 — Claude Code skill
+                  Option 2 — Paste to any AI agent
                 </p>
                 <p className="text-terminal-text">
-                  If your agent runs on Claude Code, just run:
+                  Copy this prompt and give it to your agent:
                 </p>
-                <CopyBlock text="/alienclaw-setup" />
+                <CopyBlock text={AGENT_PROMPT(linkerUrl)} />
               </div>
 
               {/* Option 3: Manual */}
@@ -148,7 +153,7 @@ function ClaimContent() {
                 <p className="text-terminal-dim uppercase tracking-wider">
                   Option 3 — Manual install
                 </p>
-                <CopyBlock text="bun add @alienclaw/identity" />
+                <CopyBlock text={`git clone --depth 1 https://github.com/nembal/alien_linker.git /tmp/alienclaw-tmp && cp -r /tmp/alienclaw-tmp/packages/identity ./alienclaw-identity && rm -rf /tmp/alienclaw-tmp && npm install ./alienclaw-identity`} />
                 <CopyBlock
                   text={`import { initIdentity } from "@alienclaw/identity"
 

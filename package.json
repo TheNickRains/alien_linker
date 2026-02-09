@@ -2,9 +2,12 @@
   "name": "alien-linker",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "dev": "bun --filter './apps/mini-app' dev",
-    "build": "bun --filter './apps/mini-app' build",
-    "generate-keys": "bun run scripts/generate-keys.ts"
+    "dev": "npm -w apps/mini-app run dev",
+    "build": "npm -w apps/mini-app run build",
+    "generate-keys": "npx tsx scripts/generate-keys.ts"
   }
 }
