@@ -45,6 +45,7 @@ export async function GET(request: Request) {
     alienId: row.alien_id,
     status: row.status,
     attestation: row.attestation,
+    gatewayUrl: row.gateway_url ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }));

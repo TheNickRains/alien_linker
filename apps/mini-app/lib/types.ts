@@ -10,6 +10,8 @@ export interface Clawbot {
   alienId: string | null;
   status: "registered" | "claimed" | "offline";
   attestation: OwnershipAttestation | null;
+  /** WebSocket URL for OpenClaw gateway (operate/chat). Omitted if not set; never expose gateway_token. */
+  gatewayUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -74,7 +76,9 @@ export interface DeployRequest {
 
 export interface DeployResponse {
   id: string;
-  status: "pending";
+  status: "pending" | "deploying";
+  /** When Railway is not configured, deploy is manual (user starts container and uses claim code). */
+  provider?: "railway" | "manual";
 }
 
 export interface HealthResponse {
@@ -93,4 +97,14 @@ export interface PublicKeysResponse {
 
 export interface ApiError {
   error: string;
+}
+
+// ── Chat (operate) types ──
+
+export interface ChatRequest {
+  message: string;
+}
+
+export interface ChatResponse {
+  reply: string;
 }

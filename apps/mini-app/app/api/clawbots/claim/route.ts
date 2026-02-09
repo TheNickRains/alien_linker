@@ -123,6 +123,7 @@ export async function POST(request: Request) {
     alienId,
     status: "claimed",
     attestation,
+    gatewayUrl: bot.gateway_url ?? undefined,
     createdAt: bot.created_at,
     updatedAt: bot.updated_at,
   };

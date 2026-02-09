@@ -137,6 +137,15 @@ export default function BotDetailPage({
         </div>
       </TerminalCard>
 
+      {/* Chat (when gateway URL is set, e.g. deployed clawbots) */}
+      {clawbot.gatewayUrl && (
+        <Link href={`/bot/${id}/chat`} className="block">
+          <TerminalButton className="w-full">
+            Chat with agent →
+          </TerminalButton>
+        </Link>
+      )}
+
       {/* ERC-8004 */}
       <Link href={`/bot/${id}/register`} className="block">
         <TerminalButton variant="ghost" className="w-full">

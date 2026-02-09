@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
 import { authenticateRequest, AuthError } from "@/lib/auth";
 import { createServerSupabase } from "@/lib/supabase";
+import {
+  triggerRailwayDeploy,
+  isRailwayConfigured,
+} from "@/lib/deploy/railway";
 import type { DeployRequest, DeployResponse, ApiError } from "@/lib/types";
 
 /**
  * POST /api/deploy
- * STUB: Creates a deploy job record. No actual deployment.
+ * Creates a deploy job and, when Railway is configured, triggers a deployment.
  */
 export async function POST(request: Request) {
   let alienId: string;
@@ -36,6 +41,7 @@ export async function POST(request: Request) {
     );
   }
 
+  const provider = isRailwayConfigured() ? "railway" : "manual";
   const db = createServerSupabase();
   const { data, error } = await db
     .from("deploy_jobs")
@@ -46,7 +52,7 @@ export async function POST(request: Request) {
         description: body.description ?? null,
         template: body.template ?? "default",
       },
-      provider: "manual",
+      provider,
       status: "pending",
     })
     .select("id")
@@ -60,8 +66,49 @@ export async function POST(request: Request) {
     );
   }
 
+  let status: "pending" | "deploying" = "pending";
+  if (isRailwayConfigured()) {
+    const deploySecret = process.env.DEPLOY_SECRET;
+    if (!deploySecret?.trim()) {
+      console.error("DEPLOY_SECRET is required when Railway is configured");
+      return NextResponse.json<ApiError>(
+        { error: "Deploy not configured" },
+        { status: 503 }
+      );
+    }
+    const gatewayToken = randomBytes(24).toString("hex");
+    const linkerUrl =
+      process.env.NEXT_PUBLIC_APP_URL || "https://alienclaw-linker.vercel.app";
+    try {
+      await triggerRailwayDeploy({
+        jobId: data.id,
+        name: body.name.trim(),
+        linkerUrl,
+        deploySecret,
+        gatewayToken,
+        appUrl: linkerUrl,
+      });
+      status = "deploying";
+      await db
+        .from("deploy_jobs")
+        .update({ status: "deploying" })
+        .eq("id", data.id);
+    } catch (e) {
+      console.error("Railway deploy trigger failed:", e);
+      await db
+        .from("deploy_jobs")
+        .update({ status: "failed", provider_metadata: { error: String(e) } })
+        .eq("id", data.id);
+      return NextResponse.json<ApiError>(
+        { error: "Deploy trigger failed" },
+        { status: 502 }
+      );
+    }
+  }
+
   return NextResponse.json<DeployResponse>({
     id: data.id,
-    status: "pending",
+    status,
+    provider,
   });
 }

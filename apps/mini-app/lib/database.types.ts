@@ -16,6 +16,8 @@ export interface Database {
           alien_id: string | null;
           attestation: OwnershipAttestation | null;
           status: string;
+          gateway_url: string | null;
+          gateway_token: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -31,6 +33,8 @@ export interface Database {
           alien_id?: string | null;
           attestation?: OwnershipAttestation | null;
           status?: string;
+          gateway_url?: string | null;
+          gateway_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -46,6 +50,8 @@ export interface Database {
           alien_id?: string | null;
           attestation?: OwnershipAttestation | null;
           status?: string;
+          gateway_url?: string | null;
+          gateway_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };

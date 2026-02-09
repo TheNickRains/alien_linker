@@ -88,9 +88,13 @@ BOT_NAME=test-bot LINKER_URL=http://localhost:3000 bun run packages/identity/src
 2. Run the migration SQL in the SQL editor: `supabase/migrations/001_initial.sql`
 3. Copy the project URL and service role key into `.env.local`
 
-### What's Stubbed / Not Yet Done
+### What's implemented (create / link / operate)
 
-- **Deploy flow**: API creates a `deploy_jobs` record but doesn't provision anything. The progress stepper stays on step 1.
+- **Deploy flow**: Creates a deploy job; when Railway is configured, triggers a deployment. Clawbot container calls `/api/deploy/[id]/ready` to auto-claim and mark the job running. Progress page shows steps and redirects to the bot when running.
+- **Chat**: For claimed clawbots with a gateway URL, the app proxies messages to the OpenClaw gateway and displays agent replies.
+
+### Not yet done
+
 - **Rate limiting**: No rate limiting on the claim endpoint yet.
 - **Alien app testing**: Requires registering the mini app in the [Alien Developer Portal](https://dev.alien.org/) and deploying to a public URL.
 - **On-chain registration**: UI preview only ("Coming Soon" badge). ERC-8004 integration is Layer 3.
@@ -140,12 +144,16 @@ const identity = await initIdentity({
 | `GET` | `/api/clawbots` | JWT | List user's claimed clawbots |
 | `GET` | `/api/clawbots/[id]` | JWT | Get clawbot details |
 | `POST` | `/api/clawbots/[id]/refresh-code` | JWT | Generate new claim code |
-| `POST` | `/api/deploy` | JWT | Create deploy job (stub) |
+| `POST` | `/api/deploy` | JWT | Create deploy job (optionally triggers Railway) |
 | `GET` | `/api/deploy/[id]` | JWT | Poll deploy job status |
+| `POST` | `/api/deploy/[id]/ready` | X-Deploy-Secret | Called by clawbot when ready; auto-claims and marks job running |
+| `POST` | `/api/clawbots/[id]/chat` | JWT | Send message to clawbot gateway; returns agent reply |
 | `GET` | `/api/health` | None | Health check |
 | `GET` | `/.well-known/alienclaw-keys.json` | None | Backend's public signing key (JWK) |
 
 ## Environment Variables
+
+See **DOCS/ENV.md** for full reference. Summary:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=         # Supabase project URL
@@ -153,7 +161,14 @@ SUPABASE_SERVICE_ROLE_KEY=        # Supabase service role key
 ATTESTATION_PRIVATE_KEY=          # ed25519 private key (base64)
 ATTESTATION_PUBLIC_KEY=           # ed25519 public key (base64)
 NEXT_PUBLIC_APP_URL=              # App URL (used in attestation issuedBy)
+DEPLOY_SECRET=                    # Shared secret for deploy/ready callback
+# Optional: RAILWAY_API_TOKEN, RAILWAY_SERVICE_ID, RAILWAY_PROJECT_ID, RAILWAY_ENVIRONMENT_ID
 ```
+
+## Deploy & hack submission
+
+- **Deploy and demo setup** — [DOCS/DEPLOY_DEMO_PLAN.md](DOCS/DEPLOY_DEMO_PLAN.md)
+- **Submission checklist and demo script** — [DOCS/HACK_SUBMISSION.md](DOCS/HACK_SUBMISSION.md)
 
 ## Tech Stack
 

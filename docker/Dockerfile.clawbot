@@ -1,0 +1,34 @@
+# AlienClaw Linker — Clawbot deploy image (OpenClaw gateway + identity)
+# Build from repo root: docker build -f docker/Dockerfile.clawbot -t alienclaw-clawbot .
+
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+# Install pnpm and openclaw deps may need build tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy workspace config and submodule / packages
+COPY package.json tsconfig.base.json ./
+COPY packages ./packages
+COPY scripts ./scripts
+COPY openclaw ./openclaw
+
+# Install root and identity deps; then openclaw deps (optional, may be large)
+RUN npm install
+RUN npm install tsx --no-save
+RUN cd packages/identity && npm install
+RUN cd /app/openclaw && npm install || true
+
+WORKDIR /app
+
+# Persistent dir for identity keypair and attestation (override HOME in run)
+ENV HOME=/app/data
+
+EXPOSE 3001 18789
+
+# Required env at runtime: LINKER_URL, DEPLOY_JOB_ID, DEPLOY_SECRET, BOT_NAME,
+# GATEWAY_TOKEN, IDENTITY_PUBLIC_URL, GATEWAY_PUBLIC_URL
+CMD ["npx", "tsx", "scripts/clawbot-launcher.ts"]
